@@ -1,0 +1,38 @@
+.action {
+    text-align: center !important;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+.header {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+}
+.empty {
+    margin-left: 10;
+    font-size: 14;
+    margin-top: 120;
+}
+
+.fade {
+    z-index: 1060;
+}
+.ag-react-container{
+    .custom-checkbox{
+        z-index: 1;
+        .custom-control-input{
+            z-index: 1;
+            margin-left: -24px;
+            left: auto;
+            margin-top: 1px;
+            &:hover:not(:disabled){
+                cursor: pointer;
+            }
+
+        }
+        input:disabled:checked ~ .custom-control-label::before{
+            background-color: #0066B3;
+        }
+    }
+}

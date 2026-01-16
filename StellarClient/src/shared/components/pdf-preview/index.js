@@ -1,0 +1,1 @@
+export { PdfPreviewComponent as PdfPreview } from './PdfPreviewComponent';
