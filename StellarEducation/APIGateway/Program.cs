@@ -1,6 +1,8 @@
 using Ocelot.Middleware;
 using Ocelot.DependencyInjection;
 
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ======================

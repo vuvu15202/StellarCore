@@ -8,6 +8,8 @@ using NotificationService.Infrastructure.Services;
 using Stellar.Shared;
 using Stellar.Shared.Models;
 
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using UserService.Application.DTOs.Requests;
 using UserService.Application.DTOs.Responses;
 using UserService.Application.Interfaces;
@@ -17,17 +18,26 @@ namespace UserService.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IFunctionRepository _functionRepository;
         private readonly IFunctionService _functionService;
+        private readonly IUserPlanSubscriptionRepository _subscriptionRepository;
+        private readonly IRelationPlanFunctionRepository _planFunctionRepository;
+        private readonly IPlanRepository _planRepository;
 
         public RoleService(
             IRelationRoleFunctionRepository roleFunctionRepository,
             IUserRepository userRepository,
             IFunctionRepository functionRepository,
-            IFunctionService functionService)
+            IFunctionService functionService,
+            IUserPlanSubscriptionRepository subscriptionRepository,
+            IRelationPlanFunctionRepository planFunctionRepository,
+            IPlanRepository planRepository)
         {
             _roleFunctionRepository = roleFunctionRepository;
             _userRepository = userRepository;
             _functionRepository = functionRepository;
             _functionService = functionService;
+            _subscriptionRepository = subscriptionRepository;
+            _planFunctionRepository = planFunctionRepository;
+            _planRepository = planRepository;
         }
 
         public async Task AddPermission(PermissionRequest request)
@@ -84,6 +94,36 @@ namespace UserService.Application.Services
                     functionPermissionIds.Add(rel.FunctionId);
                 }
             }
+
+            // --- PLAN BASED PERMISSIONS ---
+            Guid? activePlanId = null;
+            var activeSub = await _subscriptionRepository.GetActiveSubscriptionByUserId(userId);
+            if (activeSub != null)
+            {
+                activePlanId = activeSub.PlanId;
+            }
+            else
+            {
+                // Fallback to Trial Plan
+                // For simplicity, find the first free plan. 
+                // Better logic would be matching roles to PlanType.
+                var trialPlans = await _planRepository.Query().ToListAsync();
+                var defaultTrial = trialPlans.FirstOrDefault(p => p.Price == 0 && p.IsActive);
+                if (defaultTrial != null)
+                {
+                    activePlanId = defaultTrial.Id;
+                }
+            }
+
+            if (activePlanId.HasValue)
+            {
+                var planFunctionIds = await _planFunctionRepository.FindByPlanId(activePlanId.Value);
+                foreach (var pf in planFunctionIds)
+                {
+                    functionPermissionIds.Add(pf.FunctionId);
+                }
+            }
+            // ------------------------------
 
             if (!functionPermissionIds.Any())
             {

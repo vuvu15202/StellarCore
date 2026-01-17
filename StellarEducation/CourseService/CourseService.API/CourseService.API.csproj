@@ -26,6 +26,7 @@
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="ClosedXML" Version="0.102.2" />
     <PackageReference Include="DinkToPdf" Version="1.0.8" />
+    <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="EPPlus" Version="6.1.0" />
     <PackageReference Include="mailKit" Version="4.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.0" />

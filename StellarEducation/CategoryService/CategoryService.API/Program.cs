@@ -7,6 +7,8 @@ using CategoryService.Infrastructure.Persistence;
 using CategoryService.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services

@@ -8,6 +8,8 @@ using ExaminationService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using ExaminationService.Application.Interfaces;
 
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<StellarDbContext>(options =>

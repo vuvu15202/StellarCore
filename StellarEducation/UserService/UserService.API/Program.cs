@@ -9,6 +9,9 @@ using UserService.Infrastructure.Identity;
 using UserService.Infrastructure.Persistence;
 using UserService.Infrastructure.Repositories;
 using UserService.Application.Interfaces;
+using UserService.Application.BackgroundJobs;
+
+DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -102,6 +105,12 @@ builder.Services.AddScoped<IFunctionService, FunctionService>();
 builder.Services.AddScoped<IRelationRoleFunctionRepository, RelationRoleFunctionRepository>();
 builder.Services.AddScoped<IRelationRoleFunctionService, RelationRoleFunctionService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+builder.Services.AddScoped<IRelationPlanFunctionRepository, RelationPlanFunctionRepository>();
+builder.Services.AddScoped<IUserPlanSubscriptionRepository, UserPlanSubscriptionRepository>();
+builder.Services.AddScoped<IPlanService, PlanService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddHostedService<SubscriptionExpiryJob>();
 
 // ======================
 // Build app

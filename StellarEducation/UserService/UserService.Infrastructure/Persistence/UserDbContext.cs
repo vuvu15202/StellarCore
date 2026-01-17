@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UserService.Infrastructure.Identity;
 using UserService.Domain.Entities;
+using UserService.Domain.Enums;
 
 namespace UserService.Infrastructure.Persistence
 {
@@ -23,6 +24,9 @@ namespace UserService.Infrastructure.Persistence
         public DbSet<Client> Clients { get; set; } = null!;
         public DbSet<Function> Functions { get; set; } = null!;
         public DbSet<RelationRoleFunction> RoleFunctions { get; set; } = null!;
+        public DbSet<Plan> Plans { get; set; } = null!;
+        public DbSet<RelationPlanFunction> PlanFunctions { get; set; } = null!;
+        public DbSet<UserPlanSubscription> UserSubscriptions { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -93,10 +97,73 @@ namespace UserService.Infrastructure.Persistence
                 entity.HasIndex(x => x.FunctionId);
             });
 
+            builder.Entity<Plan>(entity =>
+            {
+                entity.ToTable("plans");
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Price).HasPrecision(18, 2);
+            });
+
+            builder.Entity<RelationPlanFunction>(entity =>
+            {
+                entity.ToTable("relation_plan_functions");
+                entity.HasKey(x => x.Id);
+                entity.HasIndex(x => x.PlanId);
+                entity.HasIndex(x => x.FunctionId);
+            });
+
+            builder.Entity<UserPlanSubscription>(entity =>
+            {
+                entity.ToTable("user_plan_subscriptions");
+                entity.HasKey(x => x.Id);
+                entity.HasIndex(x => x.UserId);
+                entity.HasIndex(x => x.PlanId);
+            });
+
             builder.Entity<Client>().HasData(
                 new Client { ClientId = "web", ClientName = "Web Client", Description = "Web browser clients", IsActive = true },
                 new Client { ClientId = "android", ClientName = "Android Client", Description = "Android mobile app", IsActive = true },
                 new Client { ClientId = "ios", ClientName = "iOS Client", Description = "iOS mobile app", IsActive = true }
+            );
+
+            var trialStudentPlanId = Guid.Parse("a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1");
+            var trialTeacherPlanId = Guid.Parse("b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2");
+            var trialOrgPlanId = Guid.Parse("c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3");
+
+            builder.Entity<Plan>().HasData(
+                new Plan
+                {
+                    Id = trialStudentPlanId,
+                    Name = "Trial Student",
+                    Description = "Default trial plan for students",
+                    Price = 0,
+                    DurationDays = 36500,
+                    Type = PlanType.Student,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Plan
+                {
+                    Id = trialTeacherPlanId,
+                    Name = "Trial Teacher",
+                    Description = "Default trial plan for teachers",
+                    Price = 0,
+                    DurationDays = 36500,
+                    Type = PlanType.Teacher,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Plan
+                {
+                    Id = trialOrgPlanId,
+                    Name = "Trial Organization",
+                    Description = "Default trial plan for organizations",
+                    Price = 0,
+                    DurationDays = 36500,
+                    Type = PlanType.Organization,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                }
             );
         }
     }
