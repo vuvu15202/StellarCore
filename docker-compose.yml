@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: stellar-sql
+    environment:
+      SA_PASSWORD: "YourStrong!Password123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - stellar-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - stellar-network
+
+  user-service:
+    build:
+      context: ./StellarEducation
+      dockerfile: UserService/UserService.API/Dockerfile
+    container_name: user-service
+    ports:
+      - "5001:80"
+    environment:
+      - ConnectionStrings__UserDbConnection=Server=sql-server;Database=UserServiceDB;User Id=sa;Password=YourStrong!Password123;
+    depends_on:
+      - sql-server
+    networks:
+      - stellar-network
+
+  course-service:
+    build:
+      context: ./StellarEducation
+      dockerfile: CourseService/CourseService.API/Dockerfile
+    container_name: course-service
+    ports:
+      - "5002:80"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sql-server;Database=CourseServiceDB;User Id=sa;Password=YourStrong!Password123;
+    depends_on:
+      - sql-server
+    networks:
+      - stellar-network
+
+  examination-service:
+    build:
+      context: ./StellarEducation
+      dockerfile: ExaminationService/ExaminationService.API/Dockerfile
+    container_name: examination-service
+    ports:
+      - "5003:80"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sql-server;Database=ExaminationServiceDB;User Id=sa;Password=YourStrong!Password123;
+    depends_on:
+      - sql-server
+    networks:
+      - stellar-network
+
+  category-service:
+    build:
+      context: ./StellarEducation
+      dockerfile: CategoryService/CategoryService.API/Dockerfile
+    container_name: category-service
+    ports:
+      - "5004:80"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sql-server;Database=CategoryServiceDB;User Id=sa;Password=YourStrong!Password123;
+    depends_on:
+      - sql-server
+    networks:
+      - stellar-network
+
+  stellar-client:
+    build:
+      context: ./StellarClient
+      dockerfile: Dockerfile
+    container_name: stellar-client
+    ports:
+      - "3000:80"
+    depends_on:
+      - user-service
+      - course-service
+    networks:
+      - stellar-network
+
+  notification-service:
+    build:
+      context: ./StellarEducation
+      dockerfile: NotificationService/NotificationService.API/Dockerfile
+    container_name: notification-service
+    ports:
+      - "5005:80"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sql-server;Database=NotificationServiceDB;User Id=sa;Password=YourStrong!Password123;
+    depends_on:
+      - sql-server
+      - rabbitmq
+    networks:
+      - stellar-network
+
+  media-service:
+    build:
+      context: ./StellarEducation
+      dockerfile: MediaService/MediaService.API/Dockerfile
+    container_name: media-service
+    ports:
+      - "5006:80"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sql-server;Database=MediaServiceDB;User Id=sa;Password=YourStrong!Password123;
+    depends_on:
+      - sql-server
+    networks:
+      - stellar-network
+
+networks:
+  stellar-network:
+    driver: bridge

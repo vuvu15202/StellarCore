@@ -20,7 +20,7 @@ import { AlertPage } from "../pages/user-interface/AlertPage";
 import { BadgesPage } from "../pages/user-interface/BadgePage";
 import { ButtonPage } from "../pages/user-interface/ButtonPage";
 import { CarouselPage } from "../pages/user-interface/CarouselPage";
-import { CardsPage } from   "../pages/user-interface/CardsPage";
+import { CardsPage } from "../pages/user-interface/CardsPage";
 import { CollapsePage } from "../pages/user-interface/CollapsePage";
 import { DropdownPage } from "../pages/user-interface/DropdownPage";
 import { FooterPage } from "../pages/user-interface/FooterPage";
@@ -44,6 +44,7 @@ import { HorizontalFormPage } from "../pages/form-layout/HorizontalFormPage";
 import { VerticalFormPage } from "../pages/form-layout/VerticalFormPage";
 import { TablesPage } from "../pages/TablesPage";
 import { DashboardPage } from "../pages/DashboardPage";
+import WebLayoutTest from "../pages/WebLayoutTest";
 
 import { PerfectScrollbarPage } from "../pages/extended-ui/PerfectScrollbar";
 import { TextDividerPage } from "../pages/extended-ui/TextDividerPage";
@@ -52,7 +53,8 @@ const AppRoutes = () => {
     return (
         <Routes>
             <Route path="/" element={<DashboardPage />} />
-            
+            <Route path="/web-layout/test" element={<WebLayoutTest />} />
+
             <Route path="/layout/without-menu" element={<WithoutMenuPage />} />
             <Route path="/layout/without-navbar" element={<WithoutNavbarPage />} />
             <Route path="/layout/container" element={<ContainerPage />} />
@@ -91,7 +93,7 @@ const AppRoutes = () => {
 
             <Route path="/misc/error" element={<ErrorPage />} />
             <Route path="/misc/under-maintenance" element={<MaintenancePage />} />
-            
+
             <Route path="/extended-ui/perfect-scrollbar" element={<PerfectScrollbarPage />} />
             <Route path="/extended-ui/text-divider" element={<TextDividerPage />} />
 
@@ -99,7 +101,7 @@ const AppRoutes = () => {
 
             <Route path="/form/basic-inputs" element={<BasicInputPage />} />
             <Route path="/form/input-groups" element={<InputGroupPage />} />
-            
+
             <Route path="/form-layout/horizontal-form" element={<HorizontalFormPage />} />
             <Route path="/form-layout/vertical-form" element={<VerticalFormPage />} />
 
