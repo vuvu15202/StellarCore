@@ -7,7 +7,6 @@ namespace Stellar.Shared.Services
         IUpdateService<E, ID, RES, REQ>,
         // IPatchService<E, ID, RES, REQ>,
         IGetService<E, ID, RES>,
-        IGetAllService<E, RES>,
         IDeleteService<E, ID>
     {
 

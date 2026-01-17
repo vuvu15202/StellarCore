@@ -1,12 +1,12 @@
 using System;
-using CourseService.Domain.Entities;
-using CourseService.Domain.Interfaces;
+using CourseService.Domain.Models.Entities;
+using CourseService.Domain.Services.Persistence;
 using CourseService.Infrastructure.Database;
 using Stellar.Shared.Repositories;
 
-namespace CourseService.Infrastructure.Repositories
+namespace CourseService.Infrastructure.Persistence.Repository
 {
-    public class CourseRepository : CrudRepository<Course, Guid>, ICourseRepository
+    public class CourseRepository : CrudRepository<Course, Guid>, CoursePersistence
     {
         public CourseRepository(StellarDbContext context) : base(context)
         {

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using CourseService.Domain.Entities;
+using CourseService.Domain.Models.Entities;
 
 namespace CourseService.Infrastructure.Database
 {

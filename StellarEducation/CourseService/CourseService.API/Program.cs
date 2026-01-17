@@ -1,12 +1,10 @@
-using CourseService.Application.Interfaces;
-using CourseService.Application.Services;
-using CourseService.Domain.Interfaces;
 using CourseService.Infrastructure.Database;
-using CourseService.Infrastructure.Repositories;
 using Stellar.Shared.Middlewares;
 using Stellar.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using CourseService.Domain.Services.Persistence;
+using CourseService.Infrastructure.Persistence.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,8 +30,8 @@ builder.Services.AddDbContext<StellarDbContext>(options =>
 builder.Services.AddScoped<HeaderContext>();
 
 // Register Application Services
-builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-builder.Services.AddScoped<ICourseService, CourseService.Application.Services.CourseService>();
+builder.Services.AddScoped<CoursePersistence, CourseRepository>();
+builder.Services.AddScoped<CourseService.Application.Usecases.CourseService>();
 
 // Register Swagger
 builder.Services.AddEndpointsApiExplorer();

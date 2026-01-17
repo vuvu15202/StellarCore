@@ -18,4 +18,10 @@
     <ProjectReference Include="..\..\Stellar.Shared\Stellar.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Enums\" />
+    <Folder Include="Models\Constant\" />
+    <Folder Include="Models\Values\" />
+  </ItemGroup>
+
 </Project>

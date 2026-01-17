@@ -15,8 +15,7 @@ using System.Text.Json;
 namespace Stellar.Shared.Services
 {
     public interface IGetAllService<E, RES> :
-    IGetAllPersistenceProvider<E>,
-    IResponseMapper<E, RES>
+    IGetAllPersistenceProvider<E>
     {
         public Page<RES> GetAll(
             HeaderContext context,

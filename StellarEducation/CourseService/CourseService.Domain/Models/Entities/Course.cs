@@ -1,7 +1,7 @@
 using System;
 using Stellar.Shared.Models;
 
-namespace CourseService.Domain.Entities
+namespace CourseService.Domain.Models.Entities
 {
     public class Course : AuditingEntity
     {

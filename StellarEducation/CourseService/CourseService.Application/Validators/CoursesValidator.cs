@@ -1,6 +1,6 @@
 using System;
 using CourseService.Application.Requests;
-using CourseService.Domain.Entities;
+using CourseService.Domain.Models.Entities;
 using Stellar.Shared.Models;
 using Stellar.Shared.Models.Exceptions;
 
