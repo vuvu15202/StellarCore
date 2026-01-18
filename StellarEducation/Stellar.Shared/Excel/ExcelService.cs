@@ -72,6 +72,124 @@ public class ExcelService : IExcelService
         return await Task.FromResult(new MemoryStream(buffer));
     }
 
+    public async Task<List<T>> ReadFromStreamAsync<T>(Stream stream, List<ExcelColumnConfig>? configs = null) where T : new()
+    {
+        var result = new List<T>();
+        using var workbook = WorkbookFactory.Create(stream);
+        var sheet = workbook.GetSheetAt(0);
+        if (sheet == null || sheet.LastRowNum < 1) return result;
+
+        // 1. Determine Mappings
+        var headerRow = sheet.GetRow(0);
+        var columnMappings = new Dictionary<int, PropertyInfo>();
+        var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+        if (configs != null && configs.Count > 0)
+        {
+            // Map based on provided configs
+            for (int i = 0; i < configs.Count; i++)
+            {
+                var config = configs[i];
+                // Find column index by header name in the excel
+                for (int colIndex = 0; colIndex < headerRow.LastCellNum; colIndex++)
+                {
+                    var cellValue = headerRow.GetCell(colIndex)?.ToString()?.Trim();
+                    if (string.Equals(cellValue, config.Header, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var prop = properties.FirstOrDefault(p => string.Equals(p.Name, config.PropertyName, StringComparison.OrdinalIgnoreCase));
+                        if (prop != null) columnMappings[colIndex] = prop;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Auto-map based on header names matching property names
+            for (int colIndex = 0; colIndex < headerRow.LastCellNum; colIndex++)
+            {
+                var cellValue = headerRow.GetCell(colIndex)?.ToString()?.Trim();
+                if (string.IsNullOrEmpty(cellValue)) continue;
+
+                var prop = properties.FirstOrDefault(p => string.Equals(p.Name, cellValue, StringComparison.OrdinalIgnoreCase));
+                if (prop != null) columnMappings[colIndex] = prop;
+            }
+        }
+
+        // 2. Read Data Rows
+        for (int rowIndex = 1; rowIndex <= sheet.LastRowNum; rowIndex++)
+        {
+            var row = sheet.GetRow(rowIndex);
+            if (row == null) continue;
+
+            var item = new T();
+            bool hasData = false;
+
+            foreach (var mapping in columnMappings)
+            {
+                var cell = row.GetCell(mapping.Key);
+                if (cell == null) continue;
+
+                var value = GetCellValue(cell, mapping.Value.PropertyType);
+                if (value != null)
+                {
+                    mapping.Value.SetValue(item, value);
+                    hasData = true;
+                }
+            }
+
+            if (hasData) result.Add(item);
+        }
+
+        return await Task.FromResult(result);
+    }
+
+    private object? GetCellValue(ICell cell, Type targetType)
+    {
+        if (cell == null || cell.CellType == CellType.Blank) return null;
+
+        object? value = null;
+        switch (cell.CellType)
+        {
+            case CellType.Numeric:
+                if (DateUtil.IsCellDateFormatted(cell)) value = cell.DateCellValue;
+                else value = cell.NumericCellValue;
+                break;
+            case CellType.String:
+                value = cell.StringCellValue;
+                break;
+            case CellType.Boolean:
+                value = cell.BooleanCellValue;
+                break;
+            case CellType.Formula:
+                // For formulas, we usually want the evaluated result as a string
+                value = cell.ToString();
+                break;
+        }
+
+        if (value == null) return null;
+
+        // Robust Conversion
+        try
+        {
+            var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+
+            if (underlyingType == typeof(Guid)) return Guid.Parse(value.ToString() ?? "");
+            if (underlyingType.IsEnum) return Enum.Parse(underlyingType, value.ToString() ?? "", true);
+            if (underlyingType == typeof(DateTime))
+            {
+                if (value is DateTime dt) return dt;
+                if (DateTime.TryParse(value.ToString(), out var parsedDate)) return parsedDate;
+            }
+
+            return Convert.ChangeType(value, underlyingType);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private void SetCellValue(ICell cell, object? value, ICellStyle dateStyle, ICellStyle numberStyle, ICellStyle defaultStyle)
     {
         if (value == null)
