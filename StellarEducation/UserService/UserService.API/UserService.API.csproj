@@ -16,6 +16,11 @@
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="UAParser" Version="3.1.47" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\..\Stellar.Shared\Protos\user.proto" GrpcServices="Server" Link="Protos\user.proto" />
   </ItemGroup>
 
   <ItemGroup>

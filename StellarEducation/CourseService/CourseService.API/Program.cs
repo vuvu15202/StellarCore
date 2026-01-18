@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using CourseService.Domain.Services.Persistence;
 using CourseService.Infrastructure.Persistence.Repository;
+using Stellar.Shared.Protos;
+using CourseService.Infrastructure.Communication.Services;
 
 DotNetEnv.Env.Load();
 
@@ -34,6 +36,13 @@ builder.Services.AddScoped<HeaderContext>();
 // Register Application Services
 builder.Services.AddScoped<CoursePersistence, CourseRepository>();
 builder.Services.AddScoped<CourseService.Application.Usecases.CourseService>();
+
+// Register gRPC Client
+builder.Services.AddGrpcClient<UserLookup.UserLookupClient>(o =>
+{
+    o.Address = new Uri(builder.Configuration["GrpcSettings:UserServiceUrl"] ?? "http://localhost:5001");
+});
+builder.Services.AddScoped<IUserGrpcClient, UserGrpcClient>();
 
 // Register Swagger
 builder.Services.AddEndpointsApiExplorer();

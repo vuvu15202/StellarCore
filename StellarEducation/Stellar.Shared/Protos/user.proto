@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "Stellar.Shared.Protos";
+
+package user;
+
+service UserLookup {
+  rpc GetUserById (GetUserRequest) returns (UserResponse);
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message UserResponse {
+  string id = 1;
+  string username = 2;
+  string full_name = 3;
+  string email = 4;
+  string avatar_url = 5;
+}
