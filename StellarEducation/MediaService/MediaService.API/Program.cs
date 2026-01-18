@@ -4,6 +4,7 @@ using MediaService.Infrastructure.Repositories;
 using MediaService.Infrastructure.Services;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Stellar.Shared.Extensions;
 
 DotNetEnv.Env.Load();
 
@@ -11,8 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddStellarSwagger("MediaService.API");
 
 // Database
 builder.Services.AddDbContext<MediaDbContext>(options =>

@@ -7,6 +7,7 @@ using NotificationService.Infrastructure.Repositories;
 using NotificationService.Infrastructure.Services;
 using Stellar.Shared;
 using Stellar.Shared.Models;
+using Stellar.Shared.Extensions;
 
 DotNetEnv.Env.Load();
 
@@ -14,8 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddStellarSwagger("NotificationService.API");
 builder.Services.AddSignalR();
 
 // Shared Context

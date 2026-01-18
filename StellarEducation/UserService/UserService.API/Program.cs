@@ -10,6 +10,7 @@ using UserService.Infrastructure.Persistence;
 using UserService.Infrastructure.Repositories;
 using UserService.Application.Interfaces;
 using UserService.Application.BackgroundJobs;
+using Stellar.Shared.Extensions;
 
 DotNetEnv.Env.Load();
 
@@ -27,8 +28,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddGrpc();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddStellarSwagger("UserService.API");
 
 // ======================
 // DbContext
@@ -123,7 +123,6 @@ var app = builder.Build();
 // ======================
 // Middleware
 // ======================
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

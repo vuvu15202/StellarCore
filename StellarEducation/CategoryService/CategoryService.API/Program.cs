@@ -6,6 +6,7 @@ using CategoryService.Domain.Repositories;
 using CategoryService.Infrastructure.Persistence;
 using CategoryService.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Stellar.Shared.Extensions;
 
 DotNetEnv.Env.Load();
 
@@ -18,8 +19,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddStellarSwagger("CategoryService.API");
 
 // DbContext
 builder.Services.AddDbContext<CategoryDbContext>(options =>

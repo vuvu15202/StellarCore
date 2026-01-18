@@ -7,6 +7,7 @@ using ExaminationService.Infrastructure.Database;
 using ExaminationService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using ExaminationService.Application.Interfaces;
+using Stellar.Shared.Extensions;
 
 DotNetEnv.Env.Load();
 
@@ -21,8 +22,7 @@ builder.Services.AddDbContext<StellarDbContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddStellarSwagger("ExaminationService.API");
 
 
 // Skill Services

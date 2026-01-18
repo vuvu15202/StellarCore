@@ -2,11 +2,11 @@ using CourseService.Infrastructure.Database;
 using Stellar.Shared.Middlewares;
 using Stellar.Shared.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using CourseService.Domain.Services.Persistence;
 using CourseService.Infrastructure.Persistence.Repository;
 using Stellar.Shared.Protos;
 using CourseService.Infrastructure.Communication.Services;
+using Stellar.Shared.Extensions;
 
 DotNetEnv.Env.Load();
 
@@ -45,37 +45,18 @@ builder.Services.AddGrpcClient<UserLookup.UserLookupClient>(o =>
 builder.Services.AddScoped<IUserGrpcClient, UserGrpcClient>();
 
 // Register Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Stellar Education API", Version = "v1" });
-    // Add Security Definition for X-User if needed, or just let users pass it manually
-    c.AddSecurityDefinition("X-User", new OpenApiSecurityScheme
-    {
-        Name = "X-User",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Description = "JSON Web Token or JSON Object for User Context"
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "X-User" }
-            },
-            new string[] { }
-        }
-    });
-});
+builder.Services.AddStellarSwagger("CourseService.API");
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 // Configure the HTTP request pipeline.
 // Enable Swagger in all environments for demo purposes
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseCors("AllowAll");
 

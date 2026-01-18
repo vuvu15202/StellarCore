@@ -1,5 +1,6 @@
 using Ocelot.Middleware;
 using Ocelot.DependencyInjection;
+using Stellar.Shared.Extensions;
 
 DotNetEnv.Env.Load();
 
@@ -22,10 +23,21 @@ builder.Configuration.AddJsonFile(
 builder.Services.AddOcelot(builder.Configuration);
 
 // ======================
+// Register Swagger
+// ======================
+builder.Services.AddStellarSwagger("APIGateway");
+
+// ======================
 // Build app
 // ======================
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 
