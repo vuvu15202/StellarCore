@@ -113,6 +113,7 @@ builder.Services.AddScoped<IUserPlanSubscriptionRepository, UserPlanSubscription
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddHostedService<SubscriptionExpiryJob>();
+builder.Services.AddStellarExcel();
 
 // ======================
 // Build app

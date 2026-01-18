@@ -10,12 +10,12 @@ namespace Stellar.Shared.Repositories
     public class BaseRepository<E> where E : class
     {
         protected readonly DbContext Context;
-        protected readonly DbSet<E> DbSet;
+        private DbSet<E>? _dbSet;
+        protected DbSet<E> DbSet => _dbSet ??= Context.Set<E>();
 
         public BaseRepository(DbContext context)
         {
             Context = context;
-            DbSet = context.Set<E>();
         }
     }
 

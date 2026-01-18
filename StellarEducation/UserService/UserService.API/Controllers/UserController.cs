@@ -9,6 +9,8 @@ using UserService.Application.Interfaces;
 using UserService.Domain.Entities;
 using Stellar.Shared.APIs;
 using Stellar.Shared.Services;
+using Stellar.Shared.Excel;
+using Stellar.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,10 +22,12 @@ namespace UserService.API.Controllers
     public class UserController : BaseApi<User, Guid, ProfileDTO, ProfileDTO, ProfileDTO>
     {
         private readonly IUserService _userService;
+        private readonly IExcelService _excelService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IExcelService excelService)
         {
             _userService = userService;
+            _excelService = excelService;
         }
 
         protected override IBaseService<User, Guid, ProfileDTO, ProfileDTO, ProfileDTO> Service => _userService;
@@ -314,6 +318,38 @@ namespace UserService.API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, ApiResponse<string>.FailResponse("Error fetching addresses.", new List<string> { ex.Message }));
+            }
+        }
+
+        [HttpGet("export")]
+        public async Task<IActionResult> ExportUsers()
+        {
+            try
+            {
+                // Correct call based on BaseApi/IBaseService pattern
+                var response = _userService.GetAll(Context, null, 1, 1000, null, new Dictionary<string, object>());
+                var users = response?.Content;
+                
+                if (users == null || users.Count == 0)
+                {
+                    return BadRequest(ApiResponse<string>.FailResponse("No user data found to export."));
+                }
+
+                var configs = new List<ExcelColumnConfig>
+                {
+                    new ExcelColumnConfig { Header = "Username", PropertyName = "UserName" },
+                    new ExcelColumnConfig { Header = "Email", PropertyName = "Email" },
+                    new ExcelColumnConfig { Header = "Full Name", PropertyName = "FullName" },
+                    new ExcelColumnConfig { Header = "Last Login", PropertyName = "LastLoginAt" }
+                };
+
+                var stream = await _excelService.ExportToStreamAsync(users, "Users", configs);
+                var content = stream.ToArray();
+                return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Users.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<string>.FailResponse("Excel export failed: " + ex.Message));
             }
         }
 

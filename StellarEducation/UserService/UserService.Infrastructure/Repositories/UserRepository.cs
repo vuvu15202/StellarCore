@@ -65,6 +65,94 @@ namespace UserService.Infrastructure.Repositories
             };
         }
 
+        public IQueryable<User> Query()
+        {
+            return _userManager.Users.Select(appUser => new User
+            {
+                Id = appUser.Id,
+                UserName = appUser.UserName,
+                Email = appUser.Email,
+                FullName = appUser.FullName,
+                PhoneNumber = appUser.PhoneNumber,
+                ProfilePhotoUrl = appUser.ProfilePhotoUrl,
+                IsActive = appUser.IsActive,
+                IsEmailConfirmed = appUser.EmailConfirmed,
+                CreatedAt = appUser.CreatedAt,
+                UpdatedAt = appUser.LastLoginAt ?? appUser.CreatedAt,
+                CreatedBy = "System",
+                UpdatedBy = "System"
+            });
+        }
+
+        public new User? FindById(Guid id)
+        {
+            var appUser = _userManager.FindByIdAsync(id.ToString()).GetAwaiter().GetResult();
+            return appUser != null ? MapToDomain(appUser) : null;
+        }
+
+        public User Save(User entity)
+        {
+            var appUser = _userManager.FindByIdAsync(entity.Id.ToString()).GetAwaiter().GetResult();
+            if (appUser == null)
+            {
+                var newAppUser = MapToApplicationUser(entity);
+                // Creating without password here might be tricky if it's the only way Save is used.
+                // But usually Save is for updates or simple entities.
+                _userManager.CreateAsync(newAppUser).GetAwaiter().GetResult();
+                return MapToDomain(newAppUser);
+            }
+            
+            appUser.UserName = entity.UserName;
+            appUser.Email = entity.Email;
+            appUser.FullName = entity.FullName;
+            appUser.PhoneNumber = entity.PhoneNumber;
+            appUser.ProfilePhotoUrl = entity.ProfilePhotoUrl;
+            appUser.IsActive = entity.IsActive;
+            appUser.LastLoginAt = entity.UpdatedAt;
+            
+            _userManager.UpdateAsync(appUser).GetAwaiter().GetResult();
+            return MapToDomain(appUser);
+        }
+
+        public void Delete(User entity)
+        {
+            var appUser = _userManager.FindByIdAsync(entity.Id.ToString()).GetAwaiter().GetResult();
+            if (appUser != null)
+            {
+                _userManager.DeleteAsync(appUser).GetAwaiter().GetResult();
+            }
+        }
+
+        public new bool ExistsById(Guid id)
+        {
+            return _userManager.FindByIdAsync(id.ToString()).GetAwaiter().GetResult() != null;
+        }
+
+        public new void DeleteById(Guid id)
+        {
+            var appUser = _userManager.FindByIdAsync(id.ToString()).GetAwaiter().GetResult();
+            if (appUser != null)
+            {
+                _userManager.DeleteAsync(appUser).GetAwaiter().GetResult();
+            }
+        }
+
+        public void DeleteAll(IEnumerable<User> entities)
+        {
+            foreach (var entity in entities)
+            {
+                Delete(entity);
+            }
+        }
+
+        public void DeleteByIds(IEnumerable<Guid> ids)
+        {
+            foreach (var id in ids)
+            {
+                DeleteById(id);
+            }
+        }
+
         public async Task<User?> FindByEmailAsync(string email)
         {
             var appUser = await _userManager.FindByEmailAsync(email);
