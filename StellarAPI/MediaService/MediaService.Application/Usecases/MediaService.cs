@@ -1,5 +1,4 @@
 using System;
-using MediaService.Application.Responses;
 using MediaService.Domain.Models.Entities;
 using Stellar.Shared.Interfaces.Persistence;
 using MediaService.Domain.Services.Persistence;
@@ -7,6 +6,8 @@ using Stellar.Shared.Models;
 using Stellar.Shared.Services;
 using System.Collections.Generic;
 using System.Linq;
+using MediaService.Domain.Models.Values;
+
 
 
 namespace MediaService.Application.Usecases

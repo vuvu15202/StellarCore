@@ -1,13 +1,13 @@
-using MediaService.Domain.Entities;
+using MediaService.Domain.Models.Entities;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using MediaService.Application.Responses;
+using MediaService.Domain.Models.Values;
 
-namespace MediaService.Application.Interfaces;
+namespace MediaService.Domain.Services;
 
-public interface IMediaService
+public interface IFileService
 {
     Task<MediaResponse> UploadFileAsync(IFormFile file, string subFolder = "");
     Task<Stream> DownloadFileAsync(string filePath);

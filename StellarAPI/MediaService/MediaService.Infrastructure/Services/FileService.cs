@@ -1,6 +1,6 @@
-using MediaService.Application.Interfaces;
-using MediaService.Application.Responses;
-using MediaService.Domain.Entities;
+using MediaService.Domain.Models.Entities;
+using MediaService.Domain.Services.Persistence;
+using MediaService.Domain.Services;
 using MediaService.Infrastructure.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -9,15 +9,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using MediaService.Domain.Models.Values;
 
 namespace MediaService.Infrastructure.Services;
 
-public class MediaService : IMediaService
+public class FileService : IFileService
 {
     private readonly string _rootPath;
-    private readonly IMediaRepository _mediaRepository;
+    private readonly MediaPersistence _mediaRepository;
 
-    //public MediaService(IMediaRepository mediaRepository, string rootPath = "uploads")
+    //public MediaService(MediaPersistence mediaRepository, string rootPath = "uploads")
     //{
     //    _mediaRepository = mediaRepository;
     //    _rootPath = Path.Combine(Directory.GetCurrentDirectory(), rootPath);
@@ -27,8 +28,8 @@ public class MediaService : IMediaService
     //    }
     //}
 
-    public MediaService(
-        IMediaRepository mediaRepository,
+    public FileService(
+        MediaPersistence mediaRepository,
         IOptions<MediaOptions> options)
     {
         _mediaRepository = mediaRepository;

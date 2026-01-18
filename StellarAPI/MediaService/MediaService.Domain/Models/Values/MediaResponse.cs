@@ -1,6 +1,6 @@
 using System;
 
-namespace MediaService.Application.Responses;
+namespace MediaService.Domain.Models.Values;
 
 public class MediaResponse
 {

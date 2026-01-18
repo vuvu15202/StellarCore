@@ -1,7 +1,8 @@
-using MediaService.Application.Interfaces;
+using MediaService.Domain.Services;
 using MediaService.Domain.Services.Persistence;
 using MediaService.Infrastructure.Data;
 using MediaService.Infrastructure.Options;
+using MediaService.Infrastructure.Services;
 using MediaService.Infrastructure.Services.Repositories;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,7 @@ builder.Services.AddDbContext<MediaDbContext>(options =>
 
 // Services & Repositories
 builder.Services.AddScoped<MediaPersistence, MediaRepository>();
-builder.Services.AddScoped<IMediaService, MediaService.Infrastructure.Services.MediaService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 // Configure File Upload Limits
 builder.Services.Configure<FormOptions>(options =>

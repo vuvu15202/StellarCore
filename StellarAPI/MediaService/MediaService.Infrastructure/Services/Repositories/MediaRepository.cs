@@ -1,4 +1,3 @@
-using MediaService.Application.Interfaces;
 using MediaService.Domain.Models.Entities;
 using MediaService.Infrastructure.Data;
 using Stellar.Shared.Repositories;
