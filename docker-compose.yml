@@ -119,6 +119,20 @@ services:
     networks:
       - stellar-network
 
+  payment-service:
+    build:
+      context: ./StellarEducation
+      dockerfile: PaymentService/PaymentService.API/Dockerfile
+    container_name: payment-service
+    ports:
+      - "5007:80"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sql-server;Database=PaymentServiceDB;User Id=sa;Password=YourStrong!Password123;
+    depends_on:
+      - sql-server
+    networks:
+      - stellar-network
+
 networks:
   stellar-network:
     driver: bridge

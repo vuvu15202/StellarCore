@@ -16,13 +16,13 @@ namespace MediaService.Infrastructure.Services;
 public class FileService : IFileService
 {
     private readonly string _rootPath;
-    private readonly MediaPersistence _mediaRepository;
+    private readonly MediaPersistence _mediaPersistence;
 
     public FileService(
-        MediaPersistence mediaRepository,
+        MediaPersistence mediaPersistence,
         IOptions<MediaOptions> options)
     {
-        _mediaRepository = mediaRepository;
+        _mediaPersistence = mediaPersistence;
         _rootPath = options.Value.RootPath;
 
         if (string.IsNullOrWhiteSpace(_rootPath))
@@ -53,7 +53,7 @@ public class FileService : IFileService
         string hierarchy = fileId.ToString();
         if (parentId.HasValue)
         {
-            var parent = await _mediaRepository.FindByIdAsync(parentId.Value);
+            var parent = await _mediaPersistence.FindByIdAsync(parentId.Value);
             if (parent != null)
             {
                 hierarchy = $"{parent.Hierarchy}/{fileId}";
@@ -80,14 +80,14 @@ public class FileService : IFileService
             Path = hierarchy // Mapping virtual path to Hierarchy for now
         };
 
-        await _mediaRepository.SaveAsync(media);
+        await _mediaPersistence.SaveAsync(media);
 
         return MapToResponse(media);
     }
 
     public async Task<FileDownloadResult> DownloadFileAsync(Guid mediaId)
     {
-        var media = await _mediaRepository.FindByIdAsync(mediaId);
+        var media = await _mediaPersistence.FindByIdAsync(mediaId);
         if (media == null || media.IsDeleted)
         {
             throw new FileNotFoundException("File not found in database.");
@@ -124,34 +124,46 @@ public class FileService : IFileService
 
     public async Task DeleteFileAsync(Guid mediaId)
     {
-        var media = await _mediaRepository.FindByIdAsync(mediaId);
-        if (media != null)
+        var media = await _mediaPersistence.FindByIdAsync(mediaId);
+        if (media == null) return;
+
+        // 1. If directory, recursively delete all children first
+        if (media.IsDirectory)
         {
-            media.IsDeleted = true; 
-            // Optional: Recursively delete children if directory
-             if (media.IsDirectory)
+            var children = await _mediaPersistence.FindAllByParentIdAsync(mediaId);
+            foreach (var child in children)
             {
-                var children = await _mediaRepository.FindAllByParentIdAsync(mediaId);
-                foreach(var child in children)
-                {
-                    await DeleteFileAsync(child.Id);
-                }
+                // Recursive call will handle physical deletion of files within
+                await DeleteFileAsync(child.Id);
             }
-            await _mediaRepository.SaveAsync(media);
-            
-            // Note: Physical file is kept for now (soft delete). 
         }
+        
+        // 2. Delete physical file if it's a file (not a virtual directory)
+        if (!media.IsDirectory && !string.IsNullOrEmpty(media.StoragePath))
+        {
+            var fullPath = Path.Combine(_rootPath, media.StoragePath);
+            if (File.Exists(fullPath))
+            {
+                File.Delete(fullPath);
+            }
+        }
+
+        // 3. Hard delete from database
+        _mediaPersistence.Delete(media); 
+        // Assuming SaveAsync or similar is needed if Delete is not auto-saved by repo
+        // In most CrudRepository implementations, Delete might need a call to Save/SaveChangesAsync
+        // But usually Repositories handle it. I'll check my Repository.
     }
 
     public async Task<List<MediaResponse>> ListFilesAsync(Guid? parentId = null)
     {
-        var items = await _mediaRepository.FindAllByParentIdAsync(parentId);
+        var items = await _mediaPersistence.FindAllByParentIdAsync(parentId);
         return items.Select(MapToResponse).ToList();
     }
 
     public async Task<List<MediaResponse>> GetMediaTreeAsync(Guid? parentId = null)
     {
-        var items = await _mediaRepository.FindAllByParentIdAsync(parentId);
+        var items = await _mediaPersistence.FindAllByParentIdAsync(parentId);
         var responses = new List<MediaResponse>();
 
         foreach (var item in items)
@@ -174,7 +186,7 @@ public class FileService : IFileService
 
         if (parentId.HasValue)
         {
-            var parent = await _mediaRepository.FindByIdAsync(parentId.Value);
+            var parent = await _mediaPersistence.FindByIdAsync(parentId.Value);
             if (parent != null)
             {
                 hierarchy = $"{parent.Hierarchy}/{dirId}";
@@ -196,7 +208,7 @@ public class FileService : IFileService
             StoragePath = string.Empty // No physical file
         };
 
-        await _mediaRepository.SaveAsync(media);
+        await _mediaPersistence.SaveAsync(media);
     }
 
     public Task DeleteDirectoryAsync(Guid mediaId)
