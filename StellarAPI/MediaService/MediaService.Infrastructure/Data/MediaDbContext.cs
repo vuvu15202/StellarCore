@@ -19,7 +19,12 @@ public class MediaDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
-            entity.Property(e => e.Path).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.StoragePath).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.Hierarchy).HasMaxLength(1000);
+            entity.Property(e => e.Path).HasMaxLength(500); // Keeping for legacy or virtual path
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+            
+            entity.HasIndex(e => e.ParentId);
         });
     }
 }

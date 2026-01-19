@@ -10,4 +10,5 @@ public class MediaResponse
     public long Size { get; set; }
     public bool IsDirectory { get; set; }
     public DateTime LastModified { get; set; }
+    public List<MediaResponse> Children { get; set; } = new();
 }

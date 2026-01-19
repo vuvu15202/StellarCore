@@ -19,44 +19,51 @@ public class MediasController : ControllerBase
 
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> Upload([FromForm] UploadFileRequest request, [FromQuery] string subFolder = "")
+    public async Task<IActionResult> Upload([FromForm] UploadFileRequest request, [FromQuery] Guid? parentId = null)
     {
-        var result = await _fileService.UploadFileAsync(request.File, subFolder);
+        var result = await _fileService.UploadFileAsync(request.File, parentId);
         return Ok(result);
     }
 
     [HttpGet("download")]
-    public async Task<IActionResult> Download([FromQuery] string filePath)
+    public async Task<IActionResult> Download([FromQuery] Guid mediaId)
     {
-        var stream = await _fileService.DownloadFileAsync(filePath);
-        return File(stream, "application/octet-stream", Path.GetFileName(filePath));
+        var result = await _fileService.DownloadFileAsync(mediaId);
+        return File(result.Stream, result.ContentType, result.FileName);
     }
 
     [HttpDelete]
-    public async Task<IActionResult> Delete([FromQuery] string filePath)
+    public async Task<IActionResult> Delete([FromQuery] Guid mediaId)
     {
-        await _fileService.DeleteFileAsync(filePath);
+        await _fileService.DeleteFileAsync(mediaId);
         return Ok(new { Message = "File deleted successfully" });
     }
 
     [HttpGet("list")]
-    public async Task<IActionResult> List([FromQuery] string path = "")
+    public async Task<IActionResult> List([FromQuery] Guid? parentId = null)
     {
-        var items = await _fileService.ListFilesAsync(path);
+        var items = await _fileService.ListFilesAsync(parentId);
+        return Ok(items);
+    }
+
+    [HttpGet("tree")]
+    public async Task<IActionResult> GetTree([FromQuery] Guid? parentId = null)
+    {
+        var items = await _fileService.GetMediaTreeAsync(parentId);
         return Ok(items);
     }
 
     [HttpPost("directory")]
-    public async Task<IActionResult> CreateDirectory([FromQuery] string path)
+    public async Task<IActionResult> CreateDirectory([FromQuery] string name, [FromQuery] Guid? parentId)
     {
-        await _fileService.CreateDirectoryAsync(path);
+        await _fileService.CreateDirectoryAsync(name, parentId);
         return Ok(new { Message = "Directory created successfully" });
     }
 
     [HttpDelete("directory")]
-    public async Task<IActionResult> DeleteDirectory([FromQuery] string path)
+    public async Task<IActionResult> DeleteDirectory([FromQuery] Guid mediaId)
     {
-        await _fileService.DeleteDirectoryAsync(path);
+        await _fileService.DeleteDirectoryAsync(mediaId);
         return Ok(new { Message = "Directory deleted successfully" });
     }
 

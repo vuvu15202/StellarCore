@@ -9,10 +9,11 @@ namespace MediaService.Domain.Services;
 
 public interface IFileService
 {
-    Task<MediaResponse> UploadFileAsync(IFormFile file, string subFolder = "");
-    Task<Stream> DownloadFileAsync(string filePath);
-    Task DeleteFileAsync(string filePath);
-    Task<List<MediaResponse>> ListFilesAsync(string path = "");
-    Task CreateDirectoryAsync(string path);
-    Task DeleteDirectoryAsync(string path);
+    Task<MediaResponse> UploadFileAsync(IFormFile file, Guid? parentId = null);
+    Task<FileDownloadResult> DownloadFileAsync(Guid mediaId);
+    Task DeleteFileAsync(Guid mediaId);
+    Task<List<MediaResponse>> ListFilesAsync(Guid? parentId = null);
+    Task<List<MediaResponse>> GetMediaTreeAsync(Guid? parentId = null);
+    Task CreateDirectoryAsync(string name, Guid? parentId = null);
+    Task DeleteDirectoryAsync(Guid mediaId);
 }
