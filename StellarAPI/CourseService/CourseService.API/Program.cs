@@ -4,9 +4,9 @@ using Stellar.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using CourseService.Domain.Services.Persistence;
 using Stellar.Shared.Protos;
-using CourseService.Infrastructure.Communication.Services;
 using Stellar.Shared.Extensions;
 using CourseService.Infrastructure.Services.Repository;
+using CourseService.Infrastructure.Services.Communication;
 
 DotNetEnv.Env.Load();
 

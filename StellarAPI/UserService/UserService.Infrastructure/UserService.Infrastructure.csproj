@@ -21,4 +21,8 @@
     <ProjectReference Include="..\..\Stellar.Shared\Stellar.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Communication\" />
+  </ItemGroup>
+
 </Project>

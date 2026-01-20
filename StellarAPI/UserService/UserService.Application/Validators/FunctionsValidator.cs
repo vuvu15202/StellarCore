@@ -1,8 +1,8 @@
 using System;
 using UserService.Application.DTOs.Requests;
-using UserService.Domain.Entities;
 using Stellar.Shared.Models;
 using Stellar.Shared.Models.Exceptions;
+using UserService.Domain.Models.Entities;
 
 namespace UserService.Application.Validators
 {

@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using CourseService.Infrastructure.Communication.Services;
+using CourseService.Infrastructure.Services.Communication;
 
 namespace CourseService.API.APIs;
 

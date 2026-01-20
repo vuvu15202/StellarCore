@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using UserService.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
+using UserService.Domain.Services.Persistence;
 
 namespace UserService.Application.BackgroundJobs
 {
@@ -49,7 +49,7 @@ namespace UserService.Application.BackgroundJobs
 
             using (var scope = _serviceProvider.CreateScope())
             {
-                var subscriptionRepository = scope.ServiceProvider.GetRequiredService<IUserPlanSubscriptionRepository>();
+                var subscriptionRepository = scope.ServiceProvider.GetRequiredService<UserPlanSubscriptionPersistence>();
                 
                 var expiredSubscriptions = await subscriptionRepository.Query()
                     .Where(s => s.IsActive && s.EndDate < DateTime.UtcNow)

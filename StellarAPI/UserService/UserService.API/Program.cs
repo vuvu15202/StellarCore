@@ -3,14 +3,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using UserService.Application.Services;
-using UserService.Domain.Repositories;
 using UserService.Infrastructure.Identity;
-using UserService.Infrastructure.Persistence;
-using UserService.Infrastructure.Repositories;
-using UserService.Application.Interfaces;
 using UserService.Application.BackgroundJobs;
 using Stellar.Shared.Extensions;
+using UserService.Domain.Services.Persistence;
+using UserService.Infrastructure.Database;
+using UserService.Infrastructure.Services.Repositories;
+using UserService.Application.Usecases;
+using UserService.Application.Usecases.Interfaces;
+using System.Text.Json;
 
 DotNetEnv.Env.Load();
 
@@ -23,8 +24,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
+
 
 builder.Services.AddGrpc();
 
@@ -101,18 +103,18 @@ builder.Services.AddAuthentication(options =>
 // ======================
 
 builder.Services.AddHeaderContext();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserService, UserService.Application.Services.UserService>();
-builder.Services.AddScoped<IFunctionRepository, FunctionRepository>();
+builder.Services.AddScoped<UserPersistence, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService.Application.Usecases.UserService>();
+builder.Services.AddScoped<FunctionPersistence, FunctionRepository>();
 builder.Services.AddScoped<IFunctionService, FunctionService>();
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<RolePersistence, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IPlanRepository, PlanRepository>();
-builder.Services.AddScoped<IRelationPlanFunctionRepository, RelationPlanFunctionRepository>();
-builder.Services.AddScoped<IUserPlanSubscriptionRepository, UserPlanSubscriptionRepository>();
+builder.Services.AddScoped<PlanPersistence, PlanRepository>();
+builder.Services.AddScoped<RelationPlanFunctionPersistence, RelationPlanFunctionRepository>();
+builder.Services.AddScoped<UserPlanSubscriptionPersistence, UserPlanSubscriptionRepository>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
-builder.Services.AddScoped<IFunctionGroupRepository, FunctionGroupRepository>();
+builder.Services.AddScoped<FunctionGroupPersistence, FunctionGroupRepository>();
 builder.Services.AddScoped<IFunctionGroupService, FunctionGroupService>();
 builder.Services.AddHostedService<SubscriptionExpiryJob>();
 builder.Services.AddStellarExcel();

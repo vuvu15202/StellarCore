@@ -5,8 +5,6 @@ using System.Security.Claims;
 using UAParser;
 using UserService.API.DTOs;
 using UserService.Application.DTOs;
-using UserService.Application.Interfaces;
-using UserService.Domain.Entities;
 using Stellar.Shared.APIs;
 using Stellar.Shared.Services;
 using Stellar.Shared.Excel;
@@ -14,6 +12,8 @@ using Stellar.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UserService.Domain.Models.Entities;
+using UserService.Application.Usecases.Interfaces;
 
 namespace UserService.API.Controllers
 {

@@ -1,5 +1,5 @@
 using System;
-using UserService.Domain.Enums;
+using UserService.Domain.Models.Enums;
 
 namespace UserService.Application.DTOs.Responses
 {

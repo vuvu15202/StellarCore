@@ -22,6 +22,7 @@
     <Folder Include="Models\Enums\" />
     <Folder Include="Models\Constant\" />
     <Folder Include="Models\Values\" />
+    <Folder Include="Services\Communication\" />
   </ItemGroup>
 
 </Project>

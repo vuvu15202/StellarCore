@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using UserService.Application.Interfaces;
 using UserService.Application.DTOs.Requests;
 using System;
 using System.Threading.Tasks;
+using UserService.Application.Usecases.Interfaces;
 
 namespace UserService.API.Controllers
 {
