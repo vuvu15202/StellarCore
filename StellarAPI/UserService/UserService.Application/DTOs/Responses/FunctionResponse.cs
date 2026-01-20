@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using UserService.Domain.Enums;
 using UserService.Application.DTOs.Requests;
+using UserService.Domain.Models.Enums;
 
 namespace UserService.Application.DTOs.Responses
 {

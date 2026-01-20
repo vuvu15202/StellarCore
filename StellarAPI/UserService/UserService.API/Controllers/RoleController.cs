@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using UserService.Application.Interfaces;
 using UserService.Application.DTOs.Requests;
 using UserService.API.Controllers;
 using UserService.API.DTOs;
@@ -11,7 +10,8 @@ using System;
 using Stellar.Shared.APIs;
 using Stellar.Shared.Services;
 using UserService.Infrastructure.Identity;
-using UserService.Domain.Entities;
+using UserService.Domain.Models.Entities;
+using UserService.Application.Usecases.Interfaces;
 
 namespace UserService.API.Controllers
 {

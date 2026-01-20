@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Identity;
-using UserService.Domain.Entities;
+using UserService.Domain.Models.Entities;
 
 namespace UserService.Infrastructure.Identity
 {

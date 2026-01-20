@@ -1,6 +1,6 @@
 using Grpc.Core;
 using Stellar.Shared.Protos;
-using UserService.Application.Interfaces;
+using UserService.Application.Usecases.Interfaces;
 
 namespace UserService.API.Grpc;
 
