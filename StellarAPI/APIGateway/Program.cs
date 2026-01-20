@@ -1,6 +1,11 @@
 using Ocelot.Middleware;
 using Ocelot.DependencyInjection;
 using Stellar.Shared.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using APIGateway.Middlewares;
+using APIGateway.Handlers;
 
 DotNetEnv.Env.Load();
 
@@ -19,8 +24,35 @@ builder.Configuration.AddJsonFile(
 // ======================
 // Register Ocelot
 // ======================
-
 builder.Services.AddOcelot(builder.Configuration);
+
+// ======================
+// JWT Authentication
+// ======================
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(
+                builder.Configuration["JwtSettings:SecretKey"] ?? "default_secret_key_change_me"
+            )
+        )
+    };
+});
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<PermissionDelegatingHandler>();
 
 // ======================
 // Register Swagger
@@ -40,6 +72,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// ======================
+// Authentication & Header Mapping
+// ======================
+app.UseAuthentication();
+app.UseGatewayBearerValidation();
+app.UseHeaderContextMapping();
 
 // ======================
 // Ocelot middleware

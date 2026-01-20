@@ -42,7 +42,8 @@ namespace UserService.Infrastructure.Repositories
                 IsActive = appUser.IsActive,
                 IsEmailConfirmed = appUser.EmailConfirmed,
                 CreatedAt = appUser.CreatedAt,
-                UpdatedAt = appUser.LastLoginAt ?? appUser.CreatedAt, // AuditingEntity fields
+                UpdatedAt = appUser.LastLoginAt ?? appUser.CreatedAt,
+                FunctionGroupId = appUser.FunctionGroupId,
                 CreatedBy = "System", // Or fetch from context if possible
                 UpdatedBy = "System"
             };
@@ -61,6 +62,7 @@ namespace UserService.Infrastructure.Repositories
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt,
                 LastLoginAt = user.UpdatedAt,
+                FunctionGroupId = user.FunctionGroupId,
                 EmailConfirmed = true // Default or handle via logic
             };
         }
@@ -79,6 +81,7 @@ namespace UserService.Infrastructure.Repositories
                 IsEmailConfirmed = appUser.EmailConfirmed,
                 CreatedAt = appUser.CreatedAt,
                 UpdatedAt = appUser.LastLoginAt ?? appUser.CreatedAt,
+                FunctionGroupId = appUser.FunctionGroupId,
                 CreatedBy = "System",
                 UpdatedBy = "System"
             });
@@ -109,6 +112,7 @@ namespace UserService.Infrastructure.Repositories
             appUser.ProfilePhotoUrl = entity.ProfilePhotoUrl;
             appUser.IsActive = entity.IsActive;
             appUser.LastLoginAt = entity.UpdatedAt;
+            appUser.FunctionGroupId = entity.FunctionGroupId;
             
             _userManager.UpdateAsync(appUser).GetAwaiter().GetResult();
             return MapToDomain(appUser);

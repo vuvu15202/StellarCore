@@ -8,12 +8,16 @@ using Stellar.Shared.Models;
 using UserService.Application.DTOs.Responses;
 using System.Collections.Generic;
 using System;
+using Stellar.Shared.APIs;
+using Stellar.Shared.Services;
+using UserService.Infrastructure.Identity;
+using UserService.Domain.Entities;
 
 namespace UserService.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class RoleController : ControllerBase
+    public class RoleController : BaseApi<Role, Guid, RoleResponse, RoleRequest, RoleResponse>
     {
         private readonly IRoleService _roleService;
 
@@ -22,21 +26,23 @@ namespace UserService.API.Controllers
             _roleService = roleService;
         }
 
-        [HttpPost("add-permission")]
-        public async Task<IActionResult> AddPermission([FromBody] PermissionRequest request)
+        protected override IBaseService<Role, Guid, RoleResponse, RoleRequest, RoleResponse> Service => _roleService;
+
+        [HttpPost("assign-group")]
+        public async Task<IActionResult> AssignFunctionGroup([FromBody] AssignFunctionGroupRequest request)
         {
             try
             {
-                await _roleService.AddPermission(request);
-                return Ok(ApiResponse<string>.SuccessResponse("Permissions updated successfully."));
+                await _roleService.AssignFunctionGroup(request.UserId, request.FunctionGroupId);
+                return Ok(ApiResponse<string>.SuccessResponse("Function group assigned successfully."));
             }
-            catch (System.ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ApiResponse<string>.FailResponse(ex.Message));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                return StatusCode(500, ApiResponse<string>.FailResponse("Error updating permissions.", new System.Collections.Generic.List<string> { ex.Message }));
+                return StatusCode(500, ApiResponse<string>.FailResponse("Error assigning function group.", new List<string> { ex.Message }));
             }
         }
 

@@ -23,10 +23,10 @@ namespace UserService.Infrastructure.Persistence
         public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
         public DbSet<Client> Clients { get; set; } = null!;
         public DbSet<Function> Functions { get; set; } = null!;
-        public DbSet<RelationRoleFunction> RoleFunctions { get; set; } = null!;
         public DbSet<Plan> Plans { get; set; } = null!;
         public DbSet<RelationPlanFunction> PlanFunctions { get; set; } = null!;
         public DbSet<UserPlanSubscription> UserSubscriptions { get; set; } = null!;
+        public DbSet<FunctionGroup> FunctionGroups { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -59,6 +59,11 @@ namespace UserService.Infrastructure.Persistence
             builder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
             builder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
 
+            builder.Entity<ApplicationUser>(entity =>
+            {
+                entity.HasIndex(e => e.FunctionGroupId);
+            });
+
             var adminRoleId = Guid.Parse("c4a3298c-6198-4d12-bd1a-56d1d1ce0aa7");
             var customerRoleId = Guid.Parse("38b657f4-ac20-4a5c-b2a3-16dfad61c381");
             var vendorRoleId = Guid.Parse("582880c3-f554-490f-a24e-526db35cffa5");
@@ -86,16 +91,6 @@ namespace UserService.Infrastructure.Persistence
                    Description = "Vendor who can manage products"
                }
            );
-
-            builder.Entity<RelationRoleFunction>(entity =>
-            {
-                entity.ToTable("RoleFunctions");
-                entity.HasKey(x => x.Id);
-                
-                // Optional: add indices for performance
-                entity.HasIndex(x => x.RoleId);
-                entity.HasIndex(x => x.FunctionId);
-            });
 
             builder.Entity<Plan>(entity =>
             {
@@ -165,6 +160,34 @@ namespace UserService.Infrastructure.Persistence
                     CreatedAt = DateTime.UtcNow
                 }
             );
+
+            builder.Entity<FunctionGroup>(entity =>
+            {
+                entity.ToTable("function_groups");
+                entity.HasKey(x => x.Id);
+                entity.HasIndex(x => x.DefaultFunctionGroupId);
+
+                var listConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<List<Guid>, string>(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<List<Guid>>(v, (System.Text.Json.JsonSerializerOptions)null) ?? new List<Guid>());
+
+                var listComparer = new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<Guid>>(
+                    (c1, c2) => c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList());
+
+                entity.Property(e => e.DefaultFunctionIds)
+                    .HasConversion(listConverter)
+                    .Metadata.SetValueComparer(listComparer);
+                
+                entity.Property(e => e.RuleIgnoreFunctionIds)
+                    .HasConversion(listConverter)
+                    .Metadata.SetValueComparer(listComparer);
+                
+                entity.Property(e => e.RuleViewFunctionGroupId)
+                    .HasConversion(listConverter)
+                    .Metadata.SetValueComparer(listComparer);
+            });
         }
     }
 }

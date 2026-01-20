@@ -6,7 +6,7 @@ using Stellar.Shared.Services;
 
 namespace UserService.Application.Interfaces
 {
-    public interface IRelationRoleFunctionService : IBaseService<RelationRoleFunction, Guid, RelationRoleFunctionResponse, RelationRoleFunctionRequest, RelationRoleFunctionResponse>
+    public interface IFunctionGroupService : IBaseService<FunctionGroup, Guid, FunctionGroupResponse, FunctionGroupRequest, FunctionGroupResponse>
     {
     }
 }

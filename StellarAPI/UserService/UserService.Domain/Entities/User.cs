@@ -14,6 +14,7 @@ namespace UserService.Domain.Entities
         public string? ProfilePhotoUrl { get; set; }
         public bool IsActive { get; set; }
         public DateTime? LastLoginAt { get; set; }
+        public Guid? FunctionGroupId { get; set; }
 
         public List<Address> Addresses { get; set; } = new List<Address>();
         public List<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();

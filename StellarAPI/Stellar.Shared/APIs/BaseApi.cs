@@ -60,7 +60,6 @@ namespace Stellar.Shared.APIs
                 }
             }
             
-            // Call Service.GetAll
             return Ok(Service.GetAll(Context, search, page, size, sort, filterMap ?? new Dictionary<string, object>()));
         }
     }

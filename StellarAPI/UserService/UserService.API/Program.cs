@@ -100,18 +100,20 @@ builder.Services.AddAuthentication(options =>
 // DI
 // ======================
 
+builder.Services.AddHeaderContext();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService.Application.Services.UserService>();
 builder.Services.AddScoped<IFunctionRepository, FunctionRepository>();
 builder.Services.AddScoped<IFunctionService, FunctionService>();
-builder.Services.AddScoped<IRelationRoleFunctionRepository, RelationRoleFunctionRepository>();
-builder.Services.AddScoped<IRelationRoleFunctionService, RelationRoleFunctionService>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<IRelationPlanFunctionRepository, RelationPlanFunctionRepository>();
 builder.Services.AddScoped<IUserPlanSubscriptionRepository, UserPlanSubscriptionRepository>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IFunctionGroupRepository, FunctionGroupRepository>();
+builder.Services.AddScoped<IFunctionGroupService, FunctionGroupService>();
 builder.Services.AddHostedService<SubscriptionExpiryJob>();
 builder.Services.AddStellarExcel();
 
@@ -134,6 +136,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseHeaderContext();
 
 app.MapControllers();
 app.MapGrpcService<UserService.API.Grpc.UserGrpcService>();

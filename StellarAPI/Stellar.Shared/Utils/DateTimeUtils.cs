@@ -40,5 +40,75 @@ namespace Stellar.Shared.Utils
 
             throw new ArgumentException($"Unsupported datetime format: {input}");
         }
+
+        public static DateTime GetStartOfMonth(DateTime? date = null)
+        {
+            var d = date ?? DateTime.Now;
+            return new DateTime(d.Year, d.Month, 1, 0, 0, 0);
+        }
+
+        public static DateTime GetEndOfMonth(DateTime? date = null)
+        {
+            var d = date ?? DateTime.Now;
+            int lastDay = DateTime.DaysInMonth(d.Year, d.Month);
+
+            return new DateTime(
+                d.Year,
+                d.Month,
+                lastDay,
+                23, 59, 59
+            );
+        }
+
+
+        public static DateTime GetStartOfWeekDateTime(DateTime? date = null)
+        {
+            var d = (date ?? DateTime.Now).Date;
+            return GetStartOfWeek(d);
+        }
+
+        public static DateTime GetEndOfWeekDateTime(DateTime? date = null)
+        {
+            var d = (date ?? DateTime.Now).Date;
+            return GetEndOfWeek(d).AddHours(23).AddMinutes(59).AddSeconds(59);
+        }
+
+        public static DateTime GetStartOfWeek(DateTime date)
+        {
+            int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+            return date.AddDays(-diff).Date;
+        }
+
+        public static DateTime GetEndOfWeek(DateTime date)
+        {
+            return GetStartOfWeek(date).AddDays(6);
+        }
+
+        /// <summary>
+        /// buildWeekdayLabels(new CultureInfo("vi-VN"))
+        /// buildWeekdayLabels(CultureInfo.InvariantCulture)
+        /// </summary>
+        public static string[] BuildWeekdayLabels(CultureInfo culture)
+        {
+            var labels = new string[7];
+
+            // Monday = 1 in Java, Sunday = 0 in .NET
+            for (int i = 0; i < 7; i++)
+            {
+                var day = (DayOfWeek)(((int)DayOfWeek.Monday + i) % 7);
+                labels[i] = culture.DateTimeFormat.GetAbbreviatedDayName(day);
+            }
+
+            return labels;
+        }
+
+        public static DateTime StartOfDay(DateTime? date = null)
+        => (date ?? DateTime.Now).Date;
+
+        public static DateTime EndOfDay(DateTime? date = null)
+            => (date ?? DateTime.Now).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+        public static DateTime EndOfDayExclusive(DateTime? date = null)
+            => (date ?? DateTime.Now).Date.AddDays(1);
     }
 }

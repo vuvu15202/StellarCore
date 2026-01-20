@@ -19,6 +19,7 @@ namespace UserService.Infrastructure.Identity
         public string? ProfilePhotoUrl { get; set; }
         public bool IsEmailConfirmed { get; set; }
         public DateTime? LastLoginAt { get; set; }
+        public Guid? FunctionGroupId { get; set; }
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }

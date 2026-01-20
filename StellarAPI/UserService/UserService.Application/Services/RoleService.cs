@@ -9,93 +9,142 @@ using UserService.Application.Interfaces;
 using UserService.Domain.Entities;
 using UserService.Domain.Repositories;
 using UserService.Domain.Enums;
+using Stellar.Shared.Services;
+using Stellar.Shared.Interfaces.Persistence;
+using Stellar.Shared.Models;
+using Stellar.Shared.Interfaces;
 
 namespace UserService.Application.Services
 {
-    public class RoleService : IRoleService
+    public class RoleService : BaseService<Role, Guid, RoleResponse, RoleRequest, RoleResponse>, IRoleService
     {
-        private readonly IRelationRoleFunctionRepository _roleFunctionRepository;
         private readonly IUserRepository _userRepository;
         private readonly IFunctionRepository _functionRepository;
         private readonly IFunctionService _functionService;
         private readonly IUserPlanSubscriptionRepository _subscriptionRepository;
         private readonly IRelationPlanFunctionRepository _planFunctionRepository;
         private readonly IPlanRepository _planRepository;
+        private readonly IFunctionGroupRepository _functionGroupRepository;
+        private readonly IRoleRepository _rolePersistence;
 
         public RoleService(
-            IRelationRoleFunctionRepository roleFunctionRepository,
             IUserRepository userRepository,
             IFunctionRepository functionRepository,
             IFunctionService functionService,
             IUserPlanSubscriptionRepository subscriptionRepository,
             IRelationPlanFunctionRepository planFunctionRepository,
-            IPlanRepository planRepository)
+            IPlanRepository planRepository,
+            IFunctionGroupRepository functionGroupRepository,
+            IRoleRepository rolePersistence)
         {
-            _roleFunctionRepository = roleFunctionRepository;
             _userRepository = userRepository;
             _functionRepository = functionRepository;
             _functionService = functionService;
             _subscriptionRepository = subscriptionRepository;
             _planFunctionRepository = planFunctionRepository;
             _planRepository = planRepository;
+            _functionGroupRepository = functionGroupRepository;
+            _rolePersistence = rolePersistence;
         }
 
-        public async Task AddPermission(PermissionRequest request)
+        public override ICrudPersistence<Role, Guid> GetCrudPersistence() => _rolePersistence;
+
+        public override void MappingCreate(HeaderContext context, Role entity, RoleRequest request)
         {
-            // Check if role exists
-            if (!await _userRepository.IsRoleExistsAsync(request.RoleId))
+            entity.Id = Guid.NewGuid();
+            entity.Name = request.Name;
+            entity.Description = request.Description;
+        }
+
+        public override void MappingUpdateEntity(HeaderContext context, Role entity, RoleRequest request)
+        {
+            entity.Name = request.Name;
+            entity.Description = request.Description;
+        }
+
+        public override RoleResponse MappingResponse(HeaderContext context, Role entity)
+        {
+            return new RoleResponse
             {
-                throw new ArgumentException($"Role with ID {request.RoleId} does not exist.");
+                Id = entity.Id,
+                Name = entity.Name,
+                Description = entity.Description
+            };
+        }
+
+
+
+        public async Task AssignFunctionGroup(Guid userId, Guid functionGroupId)
+        {
+            var user = await _userRepository.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new ArgumentException($"User with ID {userId} does not exist.");
             }
 
-            // Check if all functionIds exist
-            var distinctFunctionIds = request.FunctionIds.Distinct().ToList();
-            var existingFunctions = await _functionRepository.FindAllByIdIn(distinctFunctionIds);
-            if (existingFunctions.Count != distinctFunctionIds.Count)
+            if (!_functionGroupRepository.ExistsById(functionGroupId))
             {
-                var missingIds = distinctFunctionIds.Except(existingFunctions.Select(f => f.Id)).ToList();
-                throw new ArgumentException($"The following Function IDs do not exist: {string.Join(", ", missingIds)}");
+                throw new ArgumentException($"FunctionGroup with ID {functionGroupId} does not exist.");
             }
 
-            // Delete existing permissions for this role
-            await _roleFunctionRepository.DeleteByRoleId(request.RoleId);
-
-            // Add new permissions
-            foreach (var functionId in distinctFunctionIds)
-            {
-                var relation = new RelationRoleFunction
-                {
-                    Id = Guid.NewGuid(),
-                    RoleId = request.RoleId,
-                    FunctionId = functionId,
-                };
-                _roleFunctionRepository.Save(relation);
-            }
+            user.FunctionGroupId = functionGroupId;
+            await _userRepository.UpdateUserAsync(user);
         }
 
         public async Task<MenuResponse> GetPermission(Guid userId)
         {
             var response = new MenuResponse();
+            var functionPermissionIds = new HashSet<Guid>();
+            var ignoreFunctionIds = new HashSet<Guid>();
 
-            // Get role IDs for the user
-            var roleIds = await _userRepository.GetRoleIdsByUserIdAsync(userId);
-            if (roleIds == null || !roleIds.Any())
+            // 1. Get User and primary FunctionGroup
+            var user = await _userRepository.FindByIdAsync(userId);
+            if (user == null || !user.FunctionGroupId.HasValue)
             {
                 return response;
             }
 
-            // Get function IDs for these roles
-            var functionPermissionIds = new HashSet<Guid>();
-            foreach (var roleId in roleIds)
+            var primaryGroup = _functionGroupRepository.FindById(user.FunctionGroupId.Value);
+            if (primaryGroup == null)
             {
-                var relations = await _roleFunctionRepository.FindByRoleId(roleId);
-                foreach (var rel in relations)
+                return response;
+            }
+
+            response.FunctionGroupId = primaryGroup.Id;
+            response.FunctionGroupName = primaryGroup.Name;
+
+            // 2. Collect functions from primary group
+            if (primaryGroup.DefaultFunctionIds != null)
+            {
+                foreach (var fid in primaryGroup.DefaultFunctionIds)
                 {
-                    functionPermissionIds.Add(rel.FunctionId);
+                    functionPermissionIds.Add(fid);
                 }
             }
 
-            // --- PLAN BASED PERMISSIONS ---
+            // 3. Collect ignore rules from primary group
+            if (primaryGroup.RuleIgnoreFunctionIds != null)
+            {
+                foreach (var fid in primaryGroup.RuleIgnoreFunctionIds)
+                {
+                    ignoreFunctionIds.Add(fid);
+                }
+            }
+
+            // 4. Collect from parent group (DefaultFunctionGroupId) if exists
+            if (primaryGroup.DefaultFunctionGroupId.HasValue)
+            {
+                var parentGroup = _functionGroupRepository.FindById(primaryGroup.DefaultFunctionGroupId.Value);
+                if (parentGroup != null && parentGroup.DefaultFunctionIds != null)
+                {
+                    foreach (var fid in parentGroup.DefaultFunctionIds)
+                    {
+                        functionPermissionIds.Add(fid);
+                    }
+                }
+            }
+
+            // 5. Collect from Plan
             Guid? activePlanId = null;
             var activeSub = await _subscriptionRepository.GetActiveSubscriptionByUserId(userId);
             if (activeSub != null)
@@ -104,9 +153,8 @@ namespace UserService.Application.Services
             }
             else
             {
-                // Fallback to Trial Plan
-                // For simplicity, find the first free plan. 
-                // Better logic would be matching roles to PlanType.
+                // Fallback to Trial Plan matching PlanType based on legacy roles or defaults
+                // For now, keep it simple as before: find first trial plan
                 var trialPlans = await _planRepository.Query().ToListAsync();
                 var defaultTrial = trialPlans.FirstOrDefault(p => p.Price == 0 && p.IsActive);
                 if (defaultTrial != null)
@@ -123,7 +171,9 @@ namespace UserService.Application.Services
                     functionPermissionIds.Add(pf.FunctionId);
                 }
             }
-            // ------------------------------
+
+            // 6. Subtract Ignore list
+            functionPermissionIds.ExceptWith(ignoreFunctionIds);
 
             if (!functionPermissionIds.Any())
             {

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UserService.Infrastructure.Persistence;
 
@@ -11,9 +12,10 @@ using UserService.Infrastructure.Persistence;
 namespace UserService.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260119074522_UpdateFunctionGroupToListGuid")]
+    partial class UpdateFunctionGroupToListGuid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -367,7 +369,7 @@ namespace UserService.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1"),
-                            CreatedAt = new DateTime(2026, 1, 19, 13, 34, 14, 562, DateTimeKind.Utc).AddTicks(1749),
+                            CreatedAt = new DateTime(2026, 1, 19, 7, 45, 21, 618, DateTimeKind.Utc).AddTicks(8723),
                             Description = "Default trial plan for students",
                             DurationDays = 36500,
                             IsActive = true,
@@ -379,7 +381,7 @@ namespace UserService.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2"),
-                            CreatedAt = new DateTime(2026, 1, 19, 13, 34, 14, 562, DateTimeKind.Utc).AddTicks(1751),
+                            CreatedAt = new DateTime(2026, 1, 19, 7, 45, 21, 618, DateTimeKind.Utc).AddTicks(8728),
                             Description = "Default trial plan for teachers",
                             DurationDays = 36500,
                             IsActive = true,
@@ -391,7 +393,7 @@ namespace UserService.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("c3c3c3c3-c3c3-c3c3-c3c3-c3c3c3c3c3c3"),
-                            CreatedAt = new DateTime(2026, 1, 19, 13, 34, 14, 562, DateTimeKind.Utc).AddTicks(1752),
+                            CreatedAt = new DateTime(2026, 1, 19, 7, 45, 21, 618, DateTimeKind.Utc).AddTicks(8730),
                             Description = "Default trial plan for organizations",
                             DurationDays = 36500,
                             IsActive = true,
@@ -481,6 +483,39 @@ namespace UserService.Infrastructure.Migrations
                     b.ToTable("relation_plan_functions", (string)null);
                 });
 
+            modelBuilder.Entity("UserService.Domain.Entities.RelationRoleFunction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("FunctionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FunctionId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("RoleFunctions", (string)null);
+                });
+
             modelBuilder.Entity("UserService.Domain.Entities.UserPlanSubscription", b =>
                 {
                     b.Property<Guid>("Id")
@@ -557,7 +592,7 @@ namespace UserService.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("c4a3298c-6198-4d12-bd1a-56d1d1ce0aa7"),
-                            ConcurrencyStamp = "caf188cb-ac35-47fb-a1ad-fb15ed05e62d",
+                            ConcurrencyStamp = "252d5aca-4269-44ea-ac6c-5e93e5888162",
                             Description = "Administrator with full permissions",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
@@ -565,7 +600,7 @@ namespace UserService.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("38b657f4-ac20-4a5c-b2a3-16dfad61c381"),
-                            ConcurrencyStamp = "0824120e-d3a1-44c4-b61f-8b27326a37e6",
+                            ConcurrencyStamp = "ab178f44-d257-4366-b768-066ab7886c16",
                             Description = "Customer with shopping permissions",
                             Name = "Customer",
                             NormalizedName = "CUSTOMER"
@@ -573,7 +608,7 @@ namespace UserService.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("582880c3-f554-490f-a24e-526db35cffa5"),
-                            ConcurrencyStamp = "4bbbf981-8ec6-496b-aa0a-c32133a0ed4a",
+                            ConcurrencyStamp = "6a389b60-c7ac-413a-b349-59f3bab03a80",
                             Description = "Vendor who can manage products",
                             Name = "Vendor",
                             NormalizedName = "VENDOR"
